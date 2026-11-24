@@ -1,0 +1,38 @@
+
+name: Build BetterTJAPlayer
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["master", "main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: devkitpro/devkitarm:latest
+
+    steps:
+      - name: Download source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          dkp-pacman -Sy --noconfirm
+          dkp-pacman -S --needed --noconfirm \
+            3ds-dev \
+            3ds-libogg \
+            3ds-libvorbisidec \
+            3ds-jansson
+
+      - name: Compile
+        run: make
+
+      - name: Upload compiled files
+        uses: actions/upload-artifact@v4
+        with:
+          name: BetterTJAPlayer-3DS
+          path: |
+            *.3dsx
+            *.smdh
+          if-no-files-found: error
